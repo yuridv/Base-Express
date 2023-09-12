@@ -8,10 +8,7 @@ const server = require('http').createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server)
 
-const { db } = require('./src/Utils/bases')
-const { Errors, Timeout } = require('./src/Utils/functions')
-
-const routes = () => {}
+const routes = require('./src/Routes/routes')
 
 app
   .use(express.json())
