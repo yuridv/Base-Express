@@ -1,0 +1,1 @@
+module.exports = require('./Functions/Files')('./src/Utils/Bases/', '../Bases', null)
