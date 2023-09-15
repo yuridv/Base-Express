@@ -5,5 +5,7 @@ module.exports = {
       "/login/post"
     ]
   },
-  socket: {}
+  socket: {
+    sessions: []
+  }
 }

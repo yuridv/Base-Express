@@ -19,9 +19,7 @@ app
   .put('*', routes)
 
 io
-  .on('connection', async(socket) => {
-    console.log(socket)
-  })
+  .on('connection', require('./src/Events/connection'))
 
 server
   .listen(process.env.PORT || 3000, async (err) => {

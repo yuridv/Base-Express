@@ -20,7 +20,9 @@ const route = async (req, res) => {
     return res.status(route.status || 500).send(route);
 
   } catch(err) {
-
+    return Errors(err, `Routes ${__filename}`)
+      .then(() => { return route(req, res) })
+      .catch((e) => { return res.status(e.status || 500).send(e) })
   }
 }
 
