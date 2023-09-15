@@ -4,7 +4,7 @@ const route = (base, path, lower, dir = '', obj = {}) => {
   readdirSync(base + dir).forEach(async(file) => {
     if (lower) file = file.toLowerCase()
     file = file.split('.')
-    if (!dir && ['routes', 'connection'].includes(file[0])) return;
+    if (!dir && ['routes', 'events', 'connection'].includes(file[0])) return;
     if (file[1] == 'js') {
       let route = require(`${path}/${dir || '.'}/${file[0]}`)
       if (['get','post','put','delete'].includes(file[0])) {
