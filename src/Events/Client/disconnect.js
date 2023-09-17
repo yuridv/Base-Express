@@ -1,4 +1,4 @@
-const { Errors } = require('../Utils/functions')
+const { Errors } = require('../../Utils/functions')
 
 const route = async (socket) => {
   try {

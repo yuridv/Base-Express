@@ -5,7 +5,7 @@ const route = async (req, res) => {
     let body = await Validate(req.body, {
       cpf: { required: true, type: 'cpf' }
     })
-    return { status: 200, cpf: body.cpf }
+    return { status: 201, cpf: body.cpf }
   } catch(err) {
     return Errors(err, `ROUTE ${__filename}`)
       .then(() => { return route(req, res) })
