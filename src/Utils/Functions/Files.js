@@ -2,9 +2,10 @@ const { readdirSync } = require('fs')
 
 const route = (base, path, lower, dir = '', obj = {}) => {
   readdirSync(base + dir).forEach(async(file) => {
+    let file_dir = file
     if (lower) file = file.toLowerCase()
     file = file.split('.')
-    if (!dir && ['routes'].includes(file[0])) return;
+    if (!dir && ['routes'].includes(file[0].toLowerCase())) return;
     if (file[1] == 'js') {
       let route = require(`${path}/${dir}/${file[0]}`)
       if (['get','post','put','delete'].includes(file[0])) {
@@ -16,7 +17,7 @@ const route = (base, path, lower, dir = '', obj = {}) => {
       }
     }
     obj[file[0]] = {}
-    route(base, path, lower,`${dir}/${file[0]}`, obj[file[0]])
+    route(base, path, lower,`${dir ? dir + '/' : ''}${file_dir}`, obj[file[0]])
   })
   return obj;
 }
