@@ -3,9 +3,15 @@ const { Errors, Validate } = require('../../Utils/functions')
 const route = async (req, res) => {
   try {
     let body = await Validate(req.body, {
-      cpf: { required: true, type: 'cpf' }
+      string: { required: true, type: 'string' },
+      number: { required: true, type: 'number' },
+      array: { required: true, type: 'array' },
+      cpf: { required: true, type: 'cpf' },
+      phone: { required: true, type: 'phone' },
+      email: { required: true, type: 'email' },
+      date: { required: true, type: 'date' },
     })
-    return { status: 201, cpf: body.cpf }
+    return { status: 201, ...body }
   } catch(err) {
     return Errors(err, `ROUTE ${__filename}`)
       .then(() => { return route(req, res) })
