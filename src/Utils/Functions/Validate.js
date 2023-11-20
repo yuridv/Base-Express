@@ -15,52 +15,17 @@ const route = (body, camps, error = '') => new Promise(async (res,rej) => {
               .catch((e) => error += '\n* ' + e)
           } else if (camps[key].type) error += '\n* O tipo "' + camps[key].type + '" não é valido...'
 
+          if (typeof body[key] == 'string') body[key] = body[key].trim()
+          if (camps[key].remove_zeros) body[key] = await Zeros(body[key])
 
-          // if (camps[key].type == 'phone') body[key] = await typePhone(body[key]);
-          // if (camps[key].type == 'email') body[key] = await typeEmail(body[key]);
-          // if (camps[key].type == 'date') body[key] = await typeDate(body[key]);
-
-
-
-
-
-          // if (typeof body[key] == 'string') body[key] = body[key].trim()
-          // if (camps[key].remove_zeros) body[key] = await Zeros(body[key])
-
-          // if (camps[key].replace) {
-          //   for (let i in camps[key].replace) {
-          //     i = camps[key].replace[i]
-          //     if (i.includes('/')) {
-          //       body[key] = body[key].replaceAll(i.split('/')[0], i.split('/')[1])
-          //     } else body[key] = body[key].replaceAll(i, '')
-          //   }
-          // }
-
-
-          // } else if (camps[key].type == 'phone') {
-          //   body[key] = body[key].replaceAll(' ','').replaceAll('.','').replaceAll('-','').replaceAll('(','').replaceAll(')','')
-          //   if (!Number(body[key]) || body[key].length !== 11) {
-          //     error += `\n* O Campo '${camps[key].name || key}' não é um Telefone valido...! Exemplo: (51) 9 1234-5678`
-          //   }
-          // } else if (camps[key].type == 'email') {
-          //   body[key] = body[key].toLowerCase().replaceAll(' ','')
-          //   if (!body[key].includes('@') || !body[key].includes('.com')) {
-          //     error += `\n* O Campo '${camps[key].name || key}' não é um Email valido...! Exemplo: exemplo@gmail.com`
-          //   }
-          // } else if (camps[key].type == 'date') {
-          //   body[key] = new Date(body[key])
-          //   if (body[key] != 'Invalid Date') {
-          //     body[key] = new Date(body[key].setHours(body[key].getHours() -3)).toISOString().split('T')
-          //     let date = body[key][0].split('-').map(r=> Number(r))
-          //     if (date[0] < 1900 || date[0] > 2100 || date[1] < 1 || date[1] > 12 || date[2] < 1 || date[2] > 31) {
-          //       error += `\n* O Campo '${camps[key].name || key}' não possui uma data valida... Data Inserida: ${date.reverse().join('/')}`
-          //     }
-          //     let time = body[key][1].split('.')[0].split(':').map(r=> Number(r))
-          //     if (time[0] < 0 || time[0] > 23 || time[1] < 0 || time[1] > 60 || time[2] < 0 || time[2] > 60) {
-          //       error += `\n* O Campo '${camps[key].name || key}' não possui uma hora valida... Data Inserida: ${date.reverse().join('/')}`
-          //     } else body[key] = new Date(body[key].join('T'))
-          //   } else error += `\n* O Campo '${camps[key].name || key}' foi preenchido com uma data invalida...`
-          // }
+          if (camps[key].replace) {
+            for (let i in camps[key].replace) {
+              i = camps[key].replace[i]
+              if (i.includes('/')) {
+                body[key] = body[key].replaceAll(i.split('/')[0], i.split('/')[1])
+              } else body[key] = body[key].replaceAll(i, '')
+            }
+          }
  
           if (camps[key].len && String(body[key]).length != camps[key].len) {
             error += `\n* O Campo '${camps[key].name || key}' precisa conter '${camps[key].length}' carcteres...`
@@ -99,7 +64,6 @@ async function Zeros(v) {
   if (v.slice(0,1) == "0") return Zeros(v);
   return v;
 }
-
 
 const Types = {
 
