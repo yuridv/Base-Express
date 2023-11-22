@@ -7,7 +7,7 @@ const route = async (req, res) => {
   try {
     let route = routes;
     for (let param of req.params[0].replace('/','').split("/")) {
-      if (!route[param]) return res.status(500).send({ error: `O endereço da API é invalido...` });
+      if (!route[param]) return res.status(500).send({ error: `A URI inserida é invalida...` });
       route = route[param]
     }
     if (!route) return res.status(404).send({ error: `A URI inserida não foi encontrada...` });
@@ -16,7 +16,7 @@ const route = async (req, res) => {
     if (!route[req.method] || typeof route[req.method] != 'function') return res.status(405).send({ error: `O metodo solicitado é invalido para essa URI...` });
 
     route = await route[req.method](req, res);
-    if (!route) return res.status(502).send({ error: `O endereço da API não retornou uma resposta valida...` });
+    if (!route) return res.status(502).send({ error: `A API não retornou uma resposta valida...` });
     return res.status(route.status || 500).send(route);
 
   } catch(err) {
