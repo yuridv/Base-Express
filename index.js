@@ -1,16 +1,16 @@
 require('dotenv-safe').config();
 console.log(`[BackEnd]=> Starting...`)
 
-const Express = require('express');
-const express = Express();
+const express = require('express');
+const Express = express();
 
-const server = require('http').createServer(express);
+const server = require('http').createServer(Express);
 console.log('test')
 
 const routes = require('./src/Routes/routes');
 
-express
-  .use(Express.json())
+Express
+  .use(express.json())
 
   .get('*', routes)
   .post('*', routes)
