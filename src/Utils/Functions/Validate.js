@@ -133,7 +133,7 @@ const Types = {
   Cpf: async (camps, body, key) => new Promise(async (res,rej) => {
     body[key] = String(body[key]).replaceAll(' ','').replaceAll('.','').replaceAll('-','')
     if (body[key].length <= 11 && Number(body[key])) {
-      body[key] = (("00000000000" + body[key]).slice(-11))//.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+      body[key] = (("00000000000" + body[key]).slice(-11)).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
       return res();
     } else return rej(`O campo '${camps[key].name || key}' não é um CPF valido...! Exemplo: 123.456.789-11`);
   }),
@@ -141,7 +141,7 @@ const Types = {
   Phone: async (camps, body, key) => new Promise(async (res,rej) => {
     body[key] = String(body[key]).replaceAll(' ','').replaceAll('.','').replaceAll('-','').replaceAll('(','').replaceAll(')','')
     if (body[key].length == 11 && Number(body[key])) {
-      body[key] = String(body[key]);
+      body[key] = String(body[key]).replace(/(\d{0})(\d{2})(\d{1})(\d{4})/, "$1($2) $3 $4-");;
       return res();
     } else return rej(`O campo '${camps[key].name || key}' não é um Telefone valido...! Exemplo: (12) 9 1234-5678`);
   }),
