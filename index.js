@@ -5,7 +5,6 @@ const express = require('express');
 const Express = express();
 
 const server = require('http').createServer(Express);
-console.log('test')
 
 const routes = require('./src/Routes/routes');
 
