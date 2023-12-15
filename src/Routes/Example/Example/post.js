@@ -2,10 +2,10 @@ const { Errors, Validate } = require('../../../Utils/functions')
 
 const route = async (req, res) => {
   try {
-    let body = await Validate(req.body, {
+    req.body = await Validate(req.body, {
       cpf: { required: true, type: 'cpf' }
     })
-    return { status: 201, cpf: body.cpf }
+    return { status: 201, ...req.body }
   } catch(err) {
     return Errors(err, `ROUTE ${__filename}`)
       .then(() => { return route(req, res) })

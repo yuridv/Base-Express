@@ -2,7 +2,7 @@ const { Errors, Validate } = require('../../Utils/functions')
 
 const route = async (req, res) => {
   try {
-    let body = await Validate(req.body, {
+    req.body = await Validate(req.body, {
       string: { required: true, type: 'string' },
       number: { required: true, type: 'number', remove_zeros: true },
       array: { required: true, type: 'array' },
@@ -11,7 +11,7 @@ const route = async (req, res) => {
       email: { required: true, type: 'email' },
       date: { required: true, type: 'date', default: new Date() },
     })
-    return { status: 201, ...body }
+    return { status: 201, ...req.body }
   } catch(err) {
     return Errors(err, `ROUTE ${__filename}`)
       .then(() => { return route(req, res) })
