@@ -19,6 +19,8 @@ app
   .put('*', routes)
 
 io
+  .use(require('./src/Events/Authenticate'))
+
   .on('connection', require('./src/Events/Connection'))
 
 server
