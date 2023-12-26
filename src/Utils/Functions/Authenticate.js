@@ -11,14 +11,15 @@ const route = (req) => new Promise(async (res,rej) => {
     if (!req.headers["authorization"]) return rej({ error: `O token não foi informado...` })
 
     let token = jwt.verify(req.headers["authorization"], process.env.CRYPTOGRAPHY_KEY, (err, token) => {
-      if (err) return { status: 401, error: `O token inserido é invalido...` }
+      if (err) return { status: 401, error: `O seu token é invalido! Faça login novamente...` }
       return token;
     })
     if (token.error) return rej(token);
-
+    
     let login = await Query(`SELECT * FROM logins WHERE [token] = '${req.headers["authorization"]}' AND [expire] >= GETDATE()`)
-      .then(async (r) => { return { ...r[0], user: r[0].user.toUpperCase(), expire: await Data(r[0].expire) } })
-    console.log(login)
+      .then(async (r) => r[0])
+      .then(async (r) => { return { ...r, user: r.user.toUpperCase(), expire: await Data(r.expire) } })
+
     if (!login) return rej({ status: 401, error: `O seu token é invalido ou expirou! Faça login novamente...` });
     return res(login);
   } catch(err) {

@@ -16,9 +16,9 @@ const route = async (req, res, login) => {
     
     let token = jwt.sign({ user: req.body.user, password: req.body.password, date: new Date() }, process.env.CRYPTOGRAPHY_KEY)
   
-    let expire = await Data()
+    let expire = await Data(null, { hours: 3 })
       .then(r=> r.toISOString().replace('T',' ').replace('Z',''))
-
+      
     await Query(`UPDATE logins SET [token] = '${token}', [expire] = '${expire}' WHERE [user] = '${req.body.user}'`)
 
     return { status: 200, token: token }
