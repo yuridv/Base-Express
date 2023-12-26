@@ -19,7 +19,7 @@ app
   .put('*', routes)
 
 io
-  .on('connection', require('./src/Events/connection'))
+  .on('connection', require('./src/Events/Connection'))
 
 server
   .listen(process.env.PORT || 3000, async (err) => {
