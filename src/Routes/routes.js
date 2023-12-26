@@ -1,5 +1,5 @@
 const { db } = require('../Utils/bases')
-const { Errors, Files } = require('../Utils/functions')
+const { Errors, Files, Authenticate } = require('../Utils/functions')
 
 let routes = Files('./src/Routes/', '../../Routes', 1)
 
@@ -14,11 +14,14 @@ const route = async (req, res) => {
 
     req.method = req.method.toLowerCase()
     if (!route[req.method] || typeof route[req.method] != 'function') return res.status(405).send({ error: `O metodo solicitado é invalido para essa URI...` });
-
-    route = await route[req.method](req, res);
-    if (!route) return res.status(502).send({ error: `A API não retornou uma resposta valida...` });
-    return res.status(route.status || 500).send(route);
-
+    
+    return Authenticate(req)
+      .then(async (login) => {
+        route = await route[req.method](req, res, login);
+        if (!route) return res.status(502).send({ error: `A API não retornou uma resposta valida...` });
+        return res.status(route.status || 500).send(route);
+      })
+      .catch((e) => res.status(e.status || 401).send(e))
   } catch(err) {
     return Errors(err, `Routes ${__filename}`)
       .then(() => { return route(req, res) })
