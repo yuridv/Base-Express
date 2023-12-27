@@ -2,7 +2,6 @@ const { Errors, Authenticate, MSSQL } = require('../Utils/functions')
 
 const route = async (socket, next) => {
   try {
-    console.log(1)
     return Authenticate({ headers: { authorization: socket.handshake.auth.token }, params: [] }, await MSSQL())
       .then(async (login) => {
         socket.login = login;
