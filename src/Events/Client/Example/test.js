@@ -2,7 +2,7 @@ const { Errors } = require('../../../Utils/functions')
 
 const route = async (socket) => {
   try {
-    console.log('[Socket]=> example/example')
+    console.log('[Socket]=> example/test')
   } catch(err) {
     return Errors(err, `Event ${__filename}`)
       .then(() => { return route(socket) })
