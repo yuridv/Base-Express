@@ -7,7 +7,7 @@ const route = async (req, res) => {
   try {
     let route = routes;
     for (let param of req.params[0].replace('/','').split("/")) {
-      if (!route[param]) return res.status(500).send({ error: `A URI inserida é invalida...` });
+      if (!route[param]) return res.status(404).send({ error: `A URI inserida é invalida...` });
       route = route[param]
     }
     if (!route) return res.status(404).send({ error: `A URI inserida não foi encontrada...` });
