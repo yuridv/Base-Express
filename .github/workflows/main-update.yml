@@ -39,14 +39,27 @@ jobs:
             echo "Updating $branch"
             git checkout $branch
             git pull origin $branch
+
+            # Verifica se há um merge em andamento e conclui ou aborta
+            if [[ -f ".git/MERGE_HEAD" ]]; then
+              echo "Completing or aborting the ongoing merge."
+              git merge --abort || true
+            fi
+
+            # Realiza o merge com a main
             if git merge origin/main --no-commit --no-ff --allow-unrelated-histories; then
-              echo "No conflicts in $branch, proceeding with merge."
-              git merge --commit --no-ff --allow-unrelated-histories
-              git push origin $branch
+              if [[ -n $(git status -s) ]]; then
+                echo "No conflicts in $branch, proceeding with merge."
+                git merge --commit --no-ff --allow-unrelated-histories
+                git push origin $branch
+              else
+                echo "No conflicts in $branch, skipping merge."
+              fi
             else
               echo "Conflict detected in $branch. Creating a pull request."
               git merge --abort || true
               git checkout main
+              git pull origin main
               git checkout -b pr-merge-main-into-$branch
               git merge $branch --allow-unrelated-histories || true
               git push origin pr-merge-main-into-$branch
