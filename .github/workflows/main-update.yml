@@ -28,34 +28,23 @@ jobs:
           echo "$branches"
           echo "::set-output name=branches::$branches"
 
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
       - name: Update branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             git checkout $branch
+            git pull origin $branch
             git merge origin/main || {
+              echo "Conflict detected in $branch. Creating a pull request."
               git checkout main
-              git checkout -b update-$branch
-              git merge $branch || true
-              git push --set-upstream origin update-$branch
+              git checkout -b pr-merge-main-into-$branch
+              git pull origin pr-merge-main-into-$branch || true
+              git push origin pr-merge-main-into-$branch
+              gh pr create --head pr-merge-main-into-$branch --base $branch --title "Merge main into $branch" --body "This PR resolves conflicts between main and $branch."
             }
             git push origin $branch || true
-          done
-
-      - name: Create Pull Requests
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'Merge main into branch'
-          committer: 'GitHub <noreply@github.com>'
-          author: 'GitHub <noreply@github.com>'
-          delete-branch: false
-        env:
-          BRANCHES: ${{ steps.get_branches.outputs.branches }}
-      - name: Create PRs for update branches
-        run: |
-          for branch in $(echo "$BRANCHES"); do
-            if git ls-remote --heads origin update-$branch; then
-              echo "Creating PR for update-$branch"
-              gh pr create --head update-$branch --base $branch --title "Merge main into $branch" --body "This PR was created automatically to merge changes from main into $branch."
-            fi
           done
