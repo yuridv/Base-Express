@@ -36,17 +36,25 @@ jobs:
             echo "Updating branch: $branch"
             git checkout $branch
             git pull origin $branch
-            if ! git merge main; then
+            git merge --no-edit main  # Merge sem edição, para resolver conflitos posteriormente
+            git push origin $branch
+          done
+
+      - name: Check for conflicts and create pull requests
+        run: |
+          for branch in ${{ steps.branches.outputs.branches }}; do
+            echo "Checking for conflicts in branch: $branch"
+            if git merge --no-commit --no-ff main; then
+              git merge --abort
+            else
               echo "Conflict detected in branch $branch. Creating pull request."
               git push origin $branch
               curl -X POST \
-                -H "Authorization: Bearer $PERSONAL_ACCESS_TOKEN" \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
                 -H "Accept: application/vnd.github.v3+json" \
                 https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls \
                 -d "{\"title\":\"Update from main\",\"head\":\"$branch\",\"base\":\"main\"}"
-            else
-              git push origin $branch
             fi
           done
         env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
