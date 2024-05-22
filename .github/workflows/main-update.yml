@@ -48,9 +48,13 @@ jobs:
 
             # Realiza o merge com a main
             if git merge origin/main --no-commit --no-ff --allow-unrelated-histories; then
-              echo "No conflicts in $branch, proceeding with merge."
-              git merge --commit --no-ff --allow-unrelated-histories
-              git push origin $branch
+              if [[ -n $(git status -s) ]]; then
+                echo "No conflicts in $branch, proceeding with merge."
+                git merge --commit --no-ff --allow-unrelated-histories
+                git push origin $branch
+              else
+                echo "No conflicts in $branch, skipping merge."
+              fi
             else
               echo "Conflict detected in $branch. Creating a pull request."
               git merge --abort || true
