@@ -23,23 +23,28 @@ jobs:
         id: get_branches
         run: |
           git fetch --all
-          echo "::set-output name=branches::$(git branch -r | grep -v '\->' | grep -v 'main' | sed 's/origin\///')"
+          branches=$(git branch -r | grep -v '\->' | grep -v 'main' | sed 's/origin\///')
+          echo "Found branches:"
+          echo "$branches"
+          echo "::set-output name=branches::$branches"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
 
       - name: Update branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             git checkout $branch
-            git merge origin/main || git push origin $branch || git checkout -b update-$branch
-            git push --set-upstream origin update-$branch
+            git pull origin $branch
+            git merge origin/main || {
+              echo "Conflict detected in $branch. Creating a pull request."
+              git checkout main
+              git checkout -b pr-merge-main-into-$branch
+              git pull origin pr-merge-main-into-$branch || true
+              git push origin pr-merge-main-into-$branch
+              gh pr create --head pr-merge-main-into-$branch --base $branch --title "Merge main into $branch" --body "This PR resolves conflicts between main and $branch."
+            }
+            git push origin $branch || true
           done
-
-      - name: Create Pull Requests
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'Merge main into branch'
-          committer: 'GitHub <noreply@github.com>'
-          author: 'GitHub <noreply@github.com>'
-          branch: 'main'
-          delete-branch: false
-          branch-suffix: 'update'
