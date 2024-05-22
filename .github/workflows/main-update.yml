@@ -31,6 +31,8 @@ jobs:
         echo "::set-output name=branches::$(echo $branches | tr '\n' ' ')"
 
     - name: Update branches
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       run: |
         for branch in ${{ steps.branches.outputs.branches }}; do
           echo "Updating branch: $branch"
@@ -45,5 +47,3 @@ jobs:
             git push origin $branch
           fi
         done
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
