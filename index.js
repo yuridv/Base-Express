@@ -7,7 +7,7 @@ const express = Express();
 const server = require('http').createServer(express);
 
 const routes = require('./src/Routes/routes');
-console.log(2)
+console.log(3)
 express
   .use(Express.json())
 
