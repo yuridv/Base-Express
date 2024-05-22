@@ -15,7 +15,7 @@ const route = (req) => new Promise(async (res,rej) => {
       return token;
     })
     if (token.error) return rej(token);
-
+    
     let login = await Query(`SELECT * FROM logins WHERE [token] = '${req.headers["authorization"]}' AND [expire] >= GETDATE()`)
       .then(async (r) => { 
         if (r[0]) return { ...r[0], user: r[0].user.toUpperCase(), expire: await Data(r[0].expire) }

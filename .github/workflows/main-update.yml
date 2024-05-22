@@ -1,0 +1,71 @@
+name: Update All Branches
+
+on:
+  push:
+    branches:
+      - main  # Substitua 'main' pela sua branch principal
+
+jobs:
+  update-branches:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Certifique-se de obter todas as branches
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Fetch all branches
+      run: git fetch --all
+
+    - name: Get list of branches
+      id: branches
+      run: |
+        branches=$(git branch -r | grep -v '\->' | grep -v '/main$' | sed 's/origin\///')
+        echo "Branches to update: $branches"
+        echo "::set-output name=branches::$(echo $branches | tr '\n' ' ')"
+
+    - name: Try to merge main into branches
+      id: merge
+      run: |
+        for branch in ${{ steps.branches.outputs.branches }}; do
+          echo "Updating branch: $branch"
+          git checkout $branch
+          git pull origin $branch
+          if ! git merge main; then
+            echo "Conflict detected in branch $branch. Creating pull request."
+            echo "::set-output name=conflict_branch::${branch}"
+            exit 1
+          else
+            git push origin $branch
+          fi
+        done
+      continue-on-error: true
+
+    - name: Create pull request on conflict
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const branch = '${{ steps.merge.outputs.conflict_branch }}';
+          const pr_title = `Resolve conflicts in branch ${branch}`;
+          const pr_body = `This pull request resolves conflicts between the 'main' branch and the '${branch}' branch.`;
+          const pr_head = branch;
+          const pr_base = 'main';
+
+          const { data: pullRequest } = await github.pulls.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: pr_title,
+            body: pr_body,
+            head: pr_head,
+            base: pr_base,
+          });
+
+          console.log(`Created pull request #${pullRequest.number}: ${pullRequest.html_url}`);

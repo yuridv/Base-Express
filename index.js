@@ -8,8 +8,8 @@ const server = require('http').createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server)
 
-const routes = require('./src/Routes/routes')
-
+const routes = require('./src/Routes/routes');
+console.log(3)
 app
   .use(express.json())
 
