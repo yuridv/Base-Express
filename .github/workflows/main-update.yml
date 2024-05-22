@@ -28,7 +28,12 @@ jobs:
           echo "$branches"
           echo "::set-output name=branches::$branches"
 
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
       - name: Update branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             git checkout $branch
@@ -41,6 +46,3 @@ jobs:
             }
             git push origin $branch || true
           done
-
-      - name: Install GitHub CLI
-        run: sudo apt-get install -y gh
