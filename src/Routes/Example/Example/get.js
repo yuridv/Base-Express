@@ -1,6 +1,6 @@
 const { Errors, Validate } = require('../../../Utils/functions')
 
-const route = async (req, res, login) => {
+const route = async (req, res) => {
   try {
     req.query = await Validate(req.query, {
       cpf: { required: true, type: 'cpf' }
@@ -8,7 +8,7 @@ const route = async (req, res, login) => {
     return { status: 200, ...req.query }
   } catch(err) {
     return Errors(err, `ROUTE ${__filename}`)
-      .then(() => { return route(req, res, login) })
+      .then(() => { return route(req, res) })
       .catch((e) => e)
   }
 }
