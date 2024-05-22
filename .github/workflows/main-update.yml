@@ -47,6 +47,7 @@ jobs:
               echo "Conflict detected in $branch. Creating a pull request."
               git merge --abort || true
               git checkout main
+              git pull origin main
               git checkout -b pr-merge-main-into-$branch
               git merge $branch --allow-unrelated-histories || true
               git push origin pr-merge-main-into-$branch
