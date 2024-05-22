@@ -1,36 +1,45 @@
-name: Update branches on commit to base
+name: Update Branches
 
 on:
   push:
     branches:
-      - base
+      - main
 
 jobs:
   update-branches:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout base branch
+      - name: Checkout main branch
         uses: actions/checkout@v2
         with:
-          ref: base
+          ref: main
 
-      - name: Fetch all branches
-        run: git fetch --all
-
-      - name: Iterate over other branches
+      - name: Set up Git
         run: |
-          for branch in $(git branch -r | grep -v '->' | grep -v 'base'); do
-            branch_name=$(echo "$branch" | sed 's/origin\///')
-            git checkout -B $branch_name $branch
-            git merge origin/base --no-commit
-            if [ $? -ne 0 ]; then
-              git checkout -b resolve-conflict-$branch_name
-              git commit -am "Resolve conflict"
-              git push origin resolve-conflict-$branch_name
-              # Create pull request
-              # Example: hub pull-request -b $branch_name -h resolve-conflict-$branch_name
-            else
-              git commit -am "Merge from base"
-              git push origin $branch_name
-            fi
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Get all branches
+        id: get_branches
+        run: |
+          git fetch --all
+          echo "::set-output name=branches::$(git branch -r | grep -v '\->' | grep -v 'main' | sed 's/origin\///')"
+
+      - name: Update branches
+        run: |
+          for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
+            git checkout $branch
+            git merge origin/main || git push origin $branch || git checkout -b update-$branch
+            git push --set-upstream origin update-$branch
           done
+
+      - name: Create Pull Requests
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Merge main into branch'
+          committer: 'GitHub <noreply@github.com>'
+          author: 'GitHub <noreply@github.com>'
+          branch: 'main'
+          delete-branch: false
+          branch-suffix: 'update'
