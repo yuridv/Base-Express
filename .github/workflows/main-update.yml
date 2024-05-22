@@ -54,6 +54,7 @@ jobs:
                 git push origin $branch
               else
                 echo "No conflicts in $branch, skipping merge."
+                git merge --abort || true
               fi
             else
               echo "Conflict detected in $branch. Creating a pull request."
