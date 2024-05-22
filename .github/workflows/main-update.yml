@@ -30,20 +30,42 @@ jobs:
         echo "Branches to update: $branches"
         echo "::set-output name=branches::$(echo $branches | tr '\n' ' ')"
 
-    - name: Update branches
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    - name: Try to merge main into branches
+      id: merge
       run: |
         for branch in ${{ steps.branches.outputs.branches }}; do
           echo "Updating branch: $branch"
           git checkout $branch
           git pull origin $branch
           if ! git merge main; then
-            echo "Conflict detected in branch $branch. Aborting merge."
-            if [ -f .git/MERGE_HEAD ]; then
-              git merge --abort
-            fi
+            echo "Conflict detected in branch $branch. Creating pull request."
+            echo "::set-output name=conflict_branch::${branch}"
+            exit 1
           else
             git push origin $branch
           fi
         done
+      continue-on-error: true
+
+    - name: Create pull request on conflict
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const branch = '${{ steps.merge.outputs.conflict_branch }}';
+          const pr_title = `Resolve conflicts in branch ${branch}`;
+          const pr_body = `This pull request resolves conflicts between the 'main' branch and the '${branch}' branch.`;
+          const pr_head = branch;
+          const pr_base = 'main';
+
+          const { data: pullRequest } = await github.pulls.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: pr_title,
+            body: pr_body,
+            head: pr_head,
+            base: pr_base,
+          });
+
+          console.log(`Created pull request #${pullRequest.number}: ${pullRequest.html_url}`);
