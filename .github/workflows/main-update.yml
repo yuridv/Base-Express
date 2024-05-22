@@ -37,10 +37,12 @@ jobs:
         run: |
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             git checkout $branch
+            git pull origin $branch
             git merge origin/main || {
               echo "Conflict detected in $branch. Creating a pull request."
               git checkout main
               git checkout -b pr-merge-main-into-$branch
+              git pull origin pr-merge-main-into-$branch || true
               git push origin pr-merge-main-into-$branch
               gh pr create --head pr-merge-main-into-$branch --base $branch --title "Merge main into $branch" --body "This PR resolves conflicts between main and $branch."
             }
