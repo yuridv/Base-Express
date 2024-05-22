@@ -1,4 +1,4 @@
-name: Update All Branches
+name: Update Branches
 
 on:
   push:
@@ -8,53 +8,38 @@ on:
 jobs:
   update-branches:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout main branch
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Certifique-se de obter todas as branches
+          ref: main
 
       - name: Set up Git
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
 
-      - name: Fetch all branches
-        run: git fetch --all
-
-      - name: Get list of branches
-        id: branches
+      - name: Get all branches
+        id: get_branches
         run: |
-          branches=$(git branch -r | grep -v '\->' | grep -v '/main$' | sed 's/origin\///')
-          echo "Branches to update: $branches"
-          echo "::set-output name=branches::$(echo $branches | tr '\n' ' ')"
+          git fetch --all
+          echo "::set-output name=branches::$(git branch -r | grep -v '\->' | grep -v 'main' | sed 's/origin\///')"
 
       - name: Update branches
         run: |
-          for branch in ${{ steps.branches.outputs.branches }}; do
-            echo "Updating branch: $branch"
+          for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             git checkout $branch
-            git pull origin $branch
-            git merge --no-edit main  # Merge sem edição, para resolver conflitos posteriormente
-            git push origin $branch
+            git merge origin/main || git push origin $branch || git checkout -b update-$branch
+            git push --set-upstream origin update-$branch
           done
 
-      - name: Check for conflicts and create pull requests
-        run: |
-          for branch in ${{ steps.branches.outputs.branches }}; do
-            echo "Checking for conflicts in branch: $branch"
-            if git merge --no-commit --no-ff main; then
-              git merge --abort
-            else
-              echo "Conflict detected in branch $branch. Creating pull request."
-              git push origin $branch
-              curl -X POST \
-                -H "Authorization: Bearer $PERSONAL_ACCESS_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls \
-                -d "{\"title\":\"Update from main\",\"head\":\"$branch\",\"base\":\"main\"}"
-            fi
-          done
-        env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Create Pull Requests
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Merge main into branch'
+          committer: 'GitHub <noreply@github.com>'
+          author: 'GitHub <noreply@github.com>'
+          branch: 'main'
+          delete-branch: false
+          branch-suffix: 'update'
