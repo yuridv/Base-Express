@@ -1,4 +1,4 @@
-name: Main Update Branches
+name: Update All Branches
 
 on:
   push:
@@ -34,7 +34,9 @@ jobs:
           git pull origin $branch
           if ! git merge main; then
             echo "Conflict detected in branch $branch. Aborting merge."
-            git merge --abort
+            if [ -f .git/MERGE_HEAD ]; then
+              git merge --abort
+            fi
           else
             git push origin $branch
           fi
