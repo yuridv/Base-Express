@@ -9,7 +9,7 @@ const route = (base, path, lower, dir = '', obj = {}) => {
     if (file[1] == 'js') {
       let route = require(`${path}/${dir}/${file[0]}`)
       if (['get','post','put','delete'].includes(file[0])) {
-        return obj[file[0]] = route.route;
+        return obj[file[0]] = route.route
       } else if (route.method) {
         return obj[file[0]] = { [route.method.toLowerCase()]: route.route };
       } else {
