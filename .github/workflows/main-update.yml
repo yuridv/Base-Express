@@ -39,6 +39,14 @@ jobs:
             echo "Updating $branch"
             git checkout $branch
             git pull origin $branch
+
+            # Verifica se há um merge em andamento e conclui ou aborta
+            if [[ -f ".git/MERGE_HEAD" ]]; then
+              echo "Completing or aborting the ongoing merge."
+              git merge --abort || true
+            fi
+
+            # Realiza o merge com a main
             if git merge origin/main --no-commit --no-ff --allow-unrelated-histories; then
               echo "No conflicts in $branch, proceeding with merge."
               git merge --commit --no-ff --allow-unrelated-histories
