@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Certifique-se de obter todas as branches
 
     - name: Set up Git
       run: |
@@ -25,11 +27,13 @@ jobs:
       id: branches
       run: |
         branches=$(git branch -r | grep -v '\->' | grep -v '/main$' | sed 's/origin\///')
-        echo "::set-output name=branches::$branches"
+        echo "Branches to update: $branches"
+        echo "::set-output name=branches::$(echo $branches | tr '\n' ' ')"
 
     - name: Update branches
       run: |
         for branch in ${{ steps.branches.outputs.branches }}; do
+          echo "Updating branch: $branch"
           git checkout $branch
           git pull origin $branch
           if ! git merge main; then
