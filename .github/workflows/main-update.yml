@@ -39,16 +39,17 @@ jobs:
             echo "Updating $branch"
             git checkout $branch
             git pull origin $branch
-            if git merge origin/main --no-commit --no-ff; then
+            if git merge origin/main --no-commit --no-ff --allow-unrelated-histories; then
               echo "No conflicts in $branch, proceeding with merge."
-              git merge --commit --no-ff
+              git merge --commit --no-ff --allow-unrelated-histories
               git push origin $branch
             else
               echo "Conflict detected in $branch. Creating a pull request."
-              git merge --abort
+              git merge --abort || true
               git checkout main
+              git pull origin main
               git checkout -b pr-merge-main-into-$branch
-              git merge $branch || true
+              git merge $branch --allow-unrelated-histories || true
               git push origin pr-merge-main-into-$branch
               gh pr create --head pr-merge-main-into-$branch --base $branch --title "Merge main into $branch" --body "This PR resolves conflicts between main and $branch."
             fi
