@@ -33,7 +33,7 @@ jobs:
 
       - name: Update branches
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             echo "Updating $branch"
