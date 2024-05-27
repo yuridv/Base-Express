@@ -14,10 +14,10 @@ express
   .get('*', routes)
   .post('*', routes)
   .delete('*', routes)
-  .put('*', routes)
+  .put('*', routes);
 
 server
   .listen(process.env.PORT || 3000, async (err) => {
     if (err) return console.log(`[Listen Error]=> `, err)
     console.log(`[BackEnd]=> Successfully Loaded!`)
-  })
+  });
