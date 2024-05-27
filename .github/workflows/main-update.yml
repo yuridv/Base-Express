@@ -50,11 +50,20 @@ jobs:
             fi
           done
 
+
+      - name: Get All Commit Titles
+        run: |
+          all_commit_titles=$(git log --pretty=format:%s)
+          echo "Captured all commit titles:"
+          echo "${all_commit_titles}" # Imprime todos os títulos dos commits
+          commit_title=$(git log -1 --pretty=format:%s | tail -1)
+          echo "${commit_title}" # Imprime todos os títulos dos commits
+
       - name: Create Pull Requests
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          commit_title=$(git log -1 --pretty=format:%s | grep -v "Merge branch" | grep -v "merged commit" | grep -v "deleted the" | tail -1)
+          commit_title=$(git log -1 --pretty=format:%s | tail -1)
 
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             echo "❱❱❱❱❱❱ Creating temporary branch: temp-$branch ❰❰❰❰❰❰"
@@ -65,12 +74,7 @@ jobs:
             echo "༝༝༝༝༝༝ ✔ Creating pull request for branch: $branch ༝༝༝༝༝༝"
             gh pr create --base $branch --head temp-$branch --title "Automatic Update: $commit_title" --body "New update in main branch."
           done
-          
-      - name: Get All Commit Titles
-        run: |
-          all_commit_titles=$(git log --pretty=format:%s)
-          echo "Captured all commit titles:"
-          echo "${all_commit_titles}" # Imprime todos os títulos dos commits
+
 
       - name: Merge Pull Requests
         env:
