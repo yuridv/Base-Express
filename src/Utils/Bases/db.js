@@ -1,7 +1,9 @@
 module.exports = {
   mssql: {},
   authenticate: {
-    ignore: []
+    ignore: [
+      "/login/token/post"
+    ]
   },
   socket: {
     sessions: []
