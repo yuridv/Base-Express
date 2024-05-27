@@ -57,7 +57,8 @@ jobs:
           echo "Captured all commit titles:"
           echo "${all_commit_titles}" # Imprime todos os títulos dos commits
           commit_title=$(git log -1 --pretty=format:%s | tail -1)
-          echo "${commit_title}" # Imprime todos os títulos dos commits
+          echo "Captured last commit titles:"
+          echo "${commit_title}"
 
       - name: Create Pull Requests
         env:
