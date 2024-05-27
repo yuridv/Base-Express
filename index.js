@@ -16,7 +16,7 @@ app
   .get('*', routes)
   .post('*', routes)
   .delete('*', routes)
-  .put('*', routes);
+  .put('*', routes)
 
 io
   .use(require('./src/Events/Authenticate'))
