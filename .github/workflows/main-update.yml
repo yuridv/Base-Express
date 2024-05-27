@@ -55,8 +55,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           commit_title=$(git log -1 --pretty=format:%s)
-          echo "Captured commit title: ${commit_title}"
-          echo "commit_title=${commit_title}" >> $GITHUB_ENV
 
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             echo "❱❱❱❱❱❱ Creating temporary branch: temp-$branch ❰❰❰❰❰❰"
