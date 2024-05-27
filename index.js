@@ -1,25 +1,20 @@
 require('dotenv-safe').config();
 console.log(`[BackEnd]=> Starting...`)
 
-const express = require('express');
-const app = express();
+const Express = require('express');
+const express = Express();
 
-const server = require('http').createServer(app);
-const { Server } = require('socket.io');
-const io = new Server(server)
+const server = require('http').createServer(express);
 
-const routes = require('./src/Routes/routes')
+const routes = require('./src/Routes/routes');
 
-app
-  .use(express.json())
+express
+  .use(Express.json())
 
   .get('*', routes)
   .post('*', routes)
   .delete('*', routes)
   .put('*', routes)
-
-io
-  .on('connection', require('./src/Events/Connection'))
 
 server
   .listen(process.env.PORT || 3000, async (err) => {
