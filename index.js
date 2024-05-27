@@ -1,5 +1,5 @@
 require('dotenv-safe').config();
-console.log(`[BackEnd]=> Starting...`)
+console.log(`[BackEnd]=> Starting...`);
 
 const Express = require('express');
 const express = Express();
