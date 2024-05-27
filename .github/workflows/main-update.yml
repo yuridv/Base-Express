@@ -54,7 +54,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          commit_title="${{ steps.get_commit_title.outputs.commit_title }}"
+          commit_title=$(git log -1 --pretty=format:%s)
 
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             echo "❱❱❱❱❱❱ Creating temporary branch: temp-$branch ❰❰❰❰❰❰"
