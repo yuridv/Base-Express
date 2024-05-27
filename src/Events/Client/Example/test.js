@@ -1,8 +1,10 @@
 const { Errors } = require('../../../Utils/functions')
 
-const route = async (socket) => {
+const route = async (socket, value) => {
   try {
-    console.log('[Socket]=> example/test')
+    console.log('[Socket]=> example/test', value)
+
+    return true;
   } catch(err) {
     return Errors(err, `Event ${__filename}`)
       .then(() => { return route(socket) })
