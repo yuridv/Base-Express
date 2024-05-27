@@ -14,7 +14,7 @@ express
   .get('*', routes)
   .post('*', routes)
   .delete('*', routes)
-  .put('*', routes);
+  .put('*', routes)
 
 server
   .listen(process.env.PORT || 3000, async (err) => {
