@@ -53,10 +53,10 @@ jobs:
 
       - name: Get All Commit Titles
         run: |
-          all_commit_titles=$(git log --no-merges --pretty=format:%s)
+          all_commit_titles=$(git log --no-merges --pretty=format:%s | grep -v 'Revert "Merge')
           echo "Captured all commit titles:"
           echo "${all_commit_titles}" # Imprime todos os títulos dos commits
-          commit_title=$(git log -1 --no-merges --pretty=format:%s | tail -1)
+          commit_title=$(git log -1 --no-merges --pretty=format:%s | tail -1 | grep -v 'Revert "Merge')
           echo "Captured last commit titles:"
           echo "${commit_title}" # Imprime todos os títulos dos commits
 
@@ -64,7 +64,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          commit_title=$(git log -1 --no-merges --pretty=format:%s | tail -1)
+          commit_title=$(git log -1 --no-merges --pretty=format:%s | tail -1 | grep -v 'Revert "Merge')
 
           for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
             echo "❱❱❱❱❱❱ Creating temporary branch: temp-$branch ❰❰❰❰❰❰"
