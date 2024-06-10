@@ -1,0 +1,100 @@
+name: Update Branch - Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Set Account Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Get all branches
+        id: get_branches
+        run: |
+          git fetch --all
+          branches=$(git branch -r | grep -v '\->' | grep -v 'main' | grep -v 'temp-' | sed 's/origin\///')
+          echo "❱❱❱❱❱❱ Found branches: ❰❰❰❰❰❰"
+          echo "$branches"
+          branches=$(echo "$branches" | tr '\n' ' ')
+          echo "::set-output name=branches::$branches"
+
+      - name: Close and Delete Pull Requests
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
+            echo "❱❱❱❱❱❱ Checking Branch: $branch ❰❰❰❰❰❰"
+            git checkout $branch
+            git pull origin $branch
+
+            pr_url=$(gh pr list --base $branch --head temp-$branch --json url -q '.[0].url')
+            if [ -n "$pr_url" ]; then
+              echo "༝༝༝༝༝༝ ✔ Closing and Deleting Pull Request: $pr_url ༝༝༝༝༝༝"
+              gh pr close $pr_url --delete-branch
+            else
+              echo "༝༝༝༝༝༝ ✘ Branch not found Pull Request! ༝༝༝༝༝༝"
+            fi
+          done
+
+      - name: Create Pull Requests
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          commit_title=$(git log --no-merges --pretty=format:%s | grep -v 'Revert "Merge' | grep -m1 .)
+
+          for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
+            echo "❱❱❱❱❱❱ Creating temporary branch: temp-$branch ❰❰❰❰❰❰"
+            git checkout -b temp-$branch main
+            git pull origin main
+            git push -f origin temp-$branch
+
+            echo "༝༝༝༝༝༝ ✔ Creating pull request for branch: $branch ༝༝༝༝༝༝"
+            gh pr create --base $branch --head temp-$branch --title "Automatic Update: $commit_title" --body "New update in main branch."
+          done
+
+
+      - name: Merge Pull Requests
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
+            echo "❱❱❱❱❱❱ Merging changes for branch: $branch ❰❰❰❰❰❰"
+            pr_number=$(gh pr list --base $branch --head temp-$branch --json number -q '.[0].number')
+            curl -L \
+              -X PUT \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number/merge \
+              -d '{"commit_title":"Expand enum","commit_message":"Add a new value to the merge_method enum"}'
+          done
+
+      - name: Delete Temporary Branches
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          for branch in $(echo "${{ steps.get_branches.outputs.branches }}"); do
+            echo "❱❱❱❱❱❱ Checking branch: $branch ❰❰❰❰❰❰"
+
+            pr_url=$(gh pr list --base $branch --head temp-$branch --json url -q '.[0].url')
+            if [ -z "$pr_url" ]; then
+              echo "༝༝༝༝༝༝ ✔ Deleting temporary branch: temp-$branch ༝༝༝༝༝༝"
+              gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/temp-$branch
+            else
+              echo "༝༝༝༝༝༝ ✘ Branch temp-$branch has an open PR: $pr_url ༝༝༝༝༝༝"
+            fi
+          done
