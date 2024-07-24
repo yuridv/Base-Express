@@ -14,7 +14,7 @@ const route = async (req, res) => {
 
     req.method = req.method.toLowerCase()
     if (!route[req.method] || typeof route[req.method] != 'function') return res.status(405).send({ error: `O metodo solicitado é invalido para essa URI...` });
-    
+
     return Authenticate(req)
       .then(async (login) => {
         route = await route[req.method](req, res, login);
