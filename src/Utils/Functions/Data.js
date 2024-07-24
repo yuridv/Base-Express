@@ -21,9 +21,9 @@ const route = (data, timer = {}, ignore = {}) => new Promise(async (res,rej) => 
         date.setDate(date.getDate() + (negativo ? -1 : 1))
         let check = date.toISOString().slice(5,10);
         if (ignore.uteis && (date.getDay() == 0 || date.getDay() == 6)) {
-          console.log('[Final de Semana]=> ' + check)
+          // console.log('[Final de Semana]=> ' + check)
         } else if (ignore.feriados && feriados.find(r=> r == check)) {
-          console.log('[Feriado]=> ' + check)
+          // console.log('[Feriado]=> ' + check)
         } else timer.days -= 1
       }
     }
