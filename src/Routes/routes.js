@@ -18,7 +18,6 @@ const route = async (req, res) => {
     route = await route[req.method](req, res);
     if (!route) return res.status(502).send({ error: `A API não retornou uma resposta valida...` });
     return res.status(route.status || 500).send(route);
-
   } catch(err) {
     return Errors(err, `Routes ${__filename}`)
       .then(() => { return route(req, res) })

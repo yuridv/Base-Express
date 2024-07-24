@@ -20,7 +20,7 @@ const route = (body, camps, error = '') => new Promise(async (res,rej) => {
           // SUBSTITUIR PALAVRAS
           if (camps[key].replace) await Functions.Replace(camps, body, key);
 
-          // VERIFIAR O TIPO
+          // VERIFICAR O TIPO
           if (camps[key].type) camps[key].type = camps[key].type.charAt(0).toUpperCase() + camps[key].type.slice(1).toLowerCase();
           if (Types[camps[key].type]) {
             await Types[camps[key].type](camps, body, key).catch((e) => error += '\n* ' + e);
